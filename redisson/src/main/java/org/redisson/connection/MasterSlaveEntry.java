@@ -23,7 +23,6 @@ import org.redisson.client.RedisConnection;
 import org.redisson.client.RedisPubSubConnection;
 import org.redisson.client.protocol.CommandData;
 import org.redisson.client.protocol.RedisCommand;
-import org.redisson.cluster.ClusterConnectionManager;
 import org.redisson.config.MasterSlaveServersConfig;
 import org.redisson.config.ReadMode;
 import org.redisson.config.SubscriptionMode;
@@ -66,19 +65,17 @@ public class MasterSlaveEntry {
 
     final AtomicBoolean active = new AtomicBoolean(true);
     
-    String sslHostname;
+    final String sslHostname;
     
-    public MasterSlaveEntry(ConnectionManager connectionManager, MasterSlaveServersConfig config) {
+    public MasterSlaveEntry(ConnectionManager connectionManager, MasterSlaveServersConfig config, String sslHostname) {
         this.connectionManager = connectionManager;
         this.config = config;
 
         slaveBalancer = new LoadBalancerManager(config, connectionManager, this);
         writeConnectionPool = new MasterConnectionPool(config, connectionManager, this);
         pubSubConnectionPool = new MasterPubSubConnectionPool(config, connectionManager, this);
-        
-        if (connectionManager instanceof ClusterConnectionManager) {
-            sslHostname = ((ClusterConnectionManager) connectionManager).getConfigEndpointHostName();
-        }
+
+        this.sslHostname = sslHostname;
     }
 
     public MasterSlaveServersConfig getConfig() {
@@ -480,7 +477,9 @@ public class MasterSlaveEntry {
 
         RPromise<Void> result = new RedissonPromise<Void>();
         CountableListener<Void> listener = new CountableListener<Void>(result, null, 2);
-        masterEntry.getClient().shutdownAsync().onComplete(listener);
+        if (masterEntry != null) {
+            masterEntry.getClient().shutdownAsync().onComplete(listener);
+        }
         slaveBalancer.shutdownAsync().onComplete(listener);
         return result;
     }

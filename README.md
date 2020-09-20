@@ -99,14 +99,14 @@ Used by
     <dependency>
        <groupId>org.redisson</groupId>
        <artifactId>redisson</artifactId>
-       <version>3.13.3</version>
+       <version>3.13.4</version>
     </dependency>  
 
 #### Gradle
-    compile 'org.redisson:redisson:3.13.3'  
+    compile 'org.redisson:redisson:3.13.4'  
 
 #### SBT
-    libraryDependencies += "org.redisson" % "redisson" % "3.13.3"
+    libraryDependencies += "org.redisson" % "redisson" % "3.13.4"
 
 #### Java
 
@@ -135,7 +135,7 @@ RedissonRxClient redissonRx = Redisson.createRx(config);
 ```
 
 ```java
-// 3. Get Redis based Map
+// 3. Get Redis based implementation of java.util.concurrent.ConcurrentMap
 RMap<MyKey, MyValue> map = redisson.getMap("myMap");
 
 RMapReactive<MyKey, MyValue> mapReactive = redissonReactive.getMap("myMap");
@@ -144,7 +144,7 @@ RMapRx<MyKey, MyValue> mapRx = redissonRx.getMap("myMap");
 ```
 
 ```java
-// 4. Get Redis based Lock
+// 4. Get Redis based implementation of java.util.concurrent.locks.Lock
 RLock lock = redisson.getLock("myLock");
 
 RLockReactive lockReactive = redissonReactive.getLock("myLock");
@@ -153,7 +153,7 @@ RLockRx lockRx = redissonRx.getLock("myLock");
 ```
 
 ```java
-// 4. Get Redis based ExecutorService
+// 4. Get Redis based implementation of java.util.concurrent.ExecutorService
 RExecutorService executor = redisson.getExecutorService("myExecutorService");
 
 // over 50 Redis based Java objects and services ...
@@ -164,8 +164,8 @@ Consider __[Redisson PRO](https://redisson.pro)__ version for advanced features 
 
 ## Downloads
    
-[Redisson 3.13.3](https://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=org.redisson&a=redisson&v=3.13.3&e=jar),
-[Redisson node 3.13.3](https://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=org.redisson&a=redisson-all&v=3.13.3&e=jar)  
+[Redisson 3.13.4](https://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=org.redisson&a=redisson&v=3.13.4&e=jar),
+[Redisson node 3.13.4](https://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=org.redisson&a=redisson-all&v=3.13.4&e=jar)  
 
 ## FAQs
 

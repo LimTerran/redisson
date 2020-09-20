@@ -15,15 +15,14 @@
  */
 package org.redisson.tomcat;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.servlet.ServletException;
-
-import org.apache.catalina.Manager;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Redisson Valve object for Apache Tomcat
@@ -31,13 +30,13 @@ import org.apache.catalina.valves.ValveBase;
  * @author Nikita Koksharov
  *
  */
-public class UpdateValve extends ValveBase {
+public class UsageValve extends ValveBase {
 
-    private static final String ALREADY_FILTERED_NOTE = UpdateValve.class.getName() + ".ALREADY_FILTERED_NOTE";
+    private static final String ALREADY_FILTERED_NOTE = UsageValve.class.getName() + ".ALREADY_FILTERED_NOTE";
 
     private final AtomicInteger usage = new AtomicInteger(1);
 
-    public UpdateValve() {
+    public UsageValve() {
         super(true);
     }
 
@@ -59,21 +58,27 @@ public class UpdateValve extends ValveBase {
         if (request.getNote(ALREADY_FILTERED_NOTE) == null) {
             request.setNote(ALREADY_FILTERED_NOTE, Boolean.TRUE);
             try {
+                if (request.getContext() != null) {
+                    HttpSession session = request.getSession(false);
+                    if (session != null) {
+                        RedissonSession s = (RedissonSession) request.getContext().getManager().findSession(session.getId());
+                        if (s != null) {
+                            s.startUsage();
+                        }
+                    }
+                }
+
                 getNext().invoke(request, response);
             } finally {
                 request.removeNote(ALREADY_FILTERED_NOTE);
-                if (request.getContext() == null) {
-                    return;
-                }
-
-                final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                try {
-                    ClassLoader applicationClassLoader = request.getContext().getLoader().getClassLoader();
-                    Thread.currentThread().setContextClassLoader(applicationClassLoader);
-                    Manager manager = request.getContext().getManager();
-                    ((RedissonSessionManager)manager).store(request.getSession(false));
-                } finally {
-                    Thread.currentThread().setContextClassLoader(classLoader);
+                if (request.getContext() != null) {
+                    HttpSession session = request.getSession(false);
+                    if (session != null) {
+                        RedissonSession s = (RedissonSession) request.getContext().getManager().findSession(session.getId());
+                        if (s != null) {
+                            s.endUsage();
+                        }
+                    }
                 }
             }
         } else {
